@@ -40,72 +40,72 @@ export default class PersonaTemplate extends React.Component<IPersonaTemplatePro
   }
 
   public render() {
-    
+
     let renderTemplate: JSX.Element = null;
 
     if (this.state.isLoading) {
-      renderTemplate = <Spinner size={SpinnerSize.small}/>;
+      renderTemplate = <Spinner size={SpinnerSize.small} />;
     } else {
-      renderTemplate =  <div>
-                          {
-                            this.props.refinementResult.Values.map((refinementValue: IRefinementValue, j) => {
+      renderTemplate = <div>
+        {
+          this.props.refinementResult.Values.map((refinementValue: IRefinementValue, j) => {
 
-                              let imageProps: IPersonaProps = null;
+            let imageProps: IPersonaProps = null;
 
-                              // Try to see if the value looks like a login claim                              
-                              let displayName = refinementValue.RefinementValue.split('|').length > 1 ? refinementValue.RefinementValue.split('|')[1].trim() : refinementValue.RefinementValue;
-                              const claimMatch = refinementValue.RefinementValue.match(/([ic]:0[#.5!+\-%?\\e][.+][wstmrfc]\|.+?(?=\|)\|.*)/);
-                              
-                              if (claimMatch) {
-                                const accountName = claimMatch[0];
-                                const claimParts = accountName.split('|');
-                                const accountNameWithoutClaim = claimParts[claimParts.length-1];
-  
-                                // Get the user info from the already fetched list
-                                const userInfos = this.state.userInfos.filter(user => {
-                                    return user.AccountName.toLowerCase() === accountName.toLowerCase();
-                                });
-                                
-                                if (userInfos.length > 0) {
-                                  displayName = userInfos[0].Properties.DisplayName;
-                                  imageProps = {
-                                    imageUrl: accountNameWithoutClaim ? `/_layouts/15/userphoto.aspx?size=L&accountname=${accountNameWithoutClaim.toLowerCase()}`: null
-                                  };
-                                }                                
-                              }
+            // Try to see if the value looks like a login claim
+            let displayName = refinementValue.RefinementValue.split('|').length > 1 ? refinementValue.RefinementValue.split('|')[1].trim() : refinementValue.RefinementValue;
+            const claimMatch = refinementValue.RefinementValue.match(/([ic]:0[#.5!+\-%?\\e][.+][wstmrfc]\|.+?(?=\|)\|.*)/);
 
-                              if (refinementValue.RefinementCount === 0) {
-                                return null;
-                              }
-                              return (
-                                <Persona
-                                  {...imageProps}
-                                  key={j}           
-                                  className='pnp-persona'
-                                  styles={{
-                                    root: {
-                                      marginBottom: 10
-                                    },
-                                    primaryText: {
-                                      fontWeight: this._isValueInFilterSelection(refinementValue) ? 'bold' : 'normal'
-                                    }
-                                  }}
-                                  size={PersonaSize.size40}                                  
-                                  primaryText={`${displayName} (${refinementValue.RefinementCount})`}
-                                  theme={this.props.themeVariant as ITheme}
-                                  onClick={() => {
-                                    if (!this._isValueInFilterSelection(refinementValue)) { 
-                                      refinementValue.RefinementName = displayName;
-                                      this._onFilterAdded(refinementValue);
-                                    } else {
-                                      this._onFilterRemoved(refinementValue);
-                                    }
-                                  }}
-                                />
-                              );
-                            })
-                          }
-                        </div>;
+            if (claimMatch) {
+              const accountName = claimMatch[0];
+              const claimParts = accountName.split('|');
+              const accountNameWithoutClaim = claimParts[claimParts.length - 1];
+
+              // Get the user info from the already fetched list
+              const userInfos = this.state.userInfos.filter(user => {
+                return !!user.AccountName ? user.AccountName.toLowerCase() === accountName.toLowerCase() : false;
+              });
+
+              if (userInfos.length > 0) {
+                displayName = userInfos[0].Properties.DisplayName;
+                imageProps = {
+                  imageUrl: accountNameWithoutClaim ? `/_layouts/15/userphoto.aspx?size=L&accountname=${accountNameWithoutClaim.toLowerCase()}` : null
+                };
+              }
+            }
+
+            if (refinementValue.RefinementCount === 0) {
+              return null;
+            }
+            return (
+              <Persona
+                {...imageProps}
+                key={j}
+                className='pnp-persona'
+                styles={{
+                  root: {
+                    marginBottom: 10
+                  },
+                  primaryText: {
+                    fontWeight: this._isValueInFilterSelection(refinementValue) ? 'bold' : 'normal'
+                  }
+                }}
+                size={PersonaSize.size40}
+                primaryText={`${displayName} (${refinementValue.RefinementCount})`}
+                theme={this.props.themeVariant as ITheme}
+                onClick={() => {
+                  if (!this._isValueInFilterSelection(refinementValue)) {
+                    refinementValue.RefinementName = displayName;
+                    this._onFilterAdded(refinementValue);
+                  } else {
+                    this._onFilterRemoved(refinementValue);
+                  }
+                }}
+              />
+            );
+          })
+        }
+      </div>;
     }
 
     return (
@@ -132,7 +132,7 @@ export default class PersonaTemplate extends React.Component<IPersonaTemplatePro
   private async getUserInfos(props: IPersonaTemplateProps) {
 
     const accountNames = [];
-      
+
     props.refinementResult.Values.map((refinementValue: IRefinementValue) => {
 
       // Identify the login adress using Regex
@@ -202,18 +202,18 @@ export default class PersonaTemplate extends React.Component<IPersonaTemplatePro
   private _onFilterRemoved(removedValue: IRefinementValue) {
 
     const newFilterValues = this.state.refinerSelectedFilterValues.filter((elt) => {
-        return elt.RefinementValue !== removedValue.RefinementValue;
+      return elt.RefinementValue !== removedValue.RefinementValue;
     });
 
     this.setState({
-        refinerSelectedFilterValues: newFilterValues
+      refinerSelectedFilterValues: newFilterValues
     });
 
     if (!this.props.isMultiValue) {
-        this._applyFilters(newFilterValues);
+      this._applyFilters(newFilterValues);
     }
   }
-  
+
   /**
    * Applies all selected filters for the current refiner
    */
@@ -227,12 +227,12 @@ export default class PersonaTemplate extends React.Component<IPersonaTemplatePro
    */
   private _isValueInFilterSelection(valueToCheck: IRefinementValue): boolean {
 
-      let displayName: string = valueToCheck.RefinementValue.split('|').length > 1 ? valueToCheck.RefinementValue.split('|')[1].trim() : null;
+    let displayName: string = valueToCheck.RefinementValue.split('|').length > 1 ? valueToCheck.RefinementValue.split('|')[1].trim() : null;
 
-      let newFilters = this.state.refinerSelectedFilterValues.filter((filter) => {
-          return filter.RefinementToken === valueToCheck.RefinementToken && (filter.RefinementValue === valueToCheck.RefinementValue || filter.RefinementName === displayName);
-      });
+    let newFilters = this.state.refinerSelectedFilterValues.filter((filter) => {
+      return filter.RefinementToken === valueToCheck.RefinementToken && (filter.RefinementValue === valueToCheck.RefinementValue || filter.RefinementName === displayName);
+    });
 
-      return newFilters.length === 0 ? false : true;
+    return newFilters.length === 0 ? false : true;
   }
 }
